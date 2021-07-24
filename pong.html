@@ -1,0 +1,179 @@
+<!--A Pong clone craeated in canvas
+   
+  --Author: Siddhant Majumder   
+  
+  --
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Pong</title>
+    <style>
+        *{padding: 0; margin: 0}
+         canvas{background: #eee;display: block;margin: 0 auto;}
+    </style>
+</head>
+<body>
+    <canvas id="myCanvas" width="480" height="320"></canvas>
+
+    <script>
+        var canvas = document.getElementById("myCanvas");
+        var ctx = canvas.getContext("2d");
+        
+        var x = canvas.width/2;
+        var y = canvas.height/2;
+        var ballRadius = 5;
+        var dx = 4;
+        var dy = -4;
+
+        var paddleHeight = 10;
+        var paddleWidth = 75;
+        var paddleX = (canvas.width - paddleWidth)/2;
+        var cpuX = (canvas.width - paddleWidth) / 2;
+        
+        var pScore = 0;
+        var cScore = 0;
+
+        var k=1;//Lower Cpu speed  to give player chance to score
+
+        function drawBall(){
+            ctx.beginPath();
+            ctx.arc(x,y,ballRadius,0,Math.PI*2,false);
+            ctx.fillStyle = "green";
+            ctx.fill();
+            ctx.closePath();
+            
+        }
+        function drawPlayer(){
+            ctx.beginPath();
+            ctx.rect(paddleX,canvas.height-paddleHeight,paddleWidth,paddleHeight);
+            ctx.fillStyle = "blue";
+            ctx.fill();
+            ctx.closePath();
+
+        }
+        function drawPScore(){
+            ctx.font = "16px Cursive";
+            ctx.fillStyle = "darkblue";
+            ctx.fillText("P: "+pScore,450,canvas.height - paddleHeight - 10);
+        }
+        function drawCScore(){
+            ctx.font = "16px Cursive";
+            ctx.fillStyle = "red";
+            ctx.fillText("C: "+cScore,20,20+paddleHeight);
+        }
+        function drawCPU(){
+            ctx.beginPath();
+            ctx.rect(cpuX,0,paddleWidth,paddleHeight);
+            ctx.fillStyle = "red";
+            ctx.fill();
+            ctx.closePath();
+
+        }
+
+        function getSpeed(min,max){
+            return Math.random() * (max - min) + min;
+        }
+
+        function moveCpu(){
+            if(cpuX < x - ballRadius){
+                cpuX+=getSpeed(2.7,4.3);
+            }
+            
+            if(cpuX > x - ballRadius){
+                if(k%6==0){
+                    
+                    cpuX -= getSpeed(2.5,3.0);
+                }
+                else{
+                    cpuX -= 4.3;
+                }
+                if (k == 90) {
+                    k = 1;
+                }
+                
+            }
+            
+
+        }
+
+        function collisionDetection(){
+            if(x +dx + ballRadius > canvas.width || x + dx - ballRadius < 0 ){
+                dx=-dx;
+                k++;
+            }
+            if(x + dx >= cpuX && x + dx<=cpuX + paddleWidth && y+dy - ballRadius <= paddleHeight){
+                dy=-dy;
+            }
+            if(x+dx >= paddleX && x+dx<=paddleX + paddleWidth && y+dy + ballRadius == canvas.height - paddleHeight){
+                dy=-dy;
+            }
+            if(y+dy - ballRadius<= paddleHeight){
+                if(x + dx >=cpuX && x + dx <= cpuX){
+                     dy = -dy;
+                }
+                else{
+                     pScore++;
+                     x = canvas.width / 2;
+                     y = canvas.height/2;;
+                     dy = -dy;
+                }
+                 
+            }
+            if(y + dy + ballRadius > canvas.height - paddleHeight){
+                if(x + dx >= paddleX && x + dx <= paddleX + paddleWidth){
+                    dy = -dy;
+                }
+                else{
+                    cScore++;
+                    x = canvas.width / 2;
+                    y = canvas.height /2;
+                    dy = -dy;
+                }
+                
+            }
+        }
+        function checkGame(){
+            if(cScore == 10){
+                alert("You loose!");
+                document.location.reload();
+                cScore =0;
+                pScore =0;
+            }
+            if(pScore == 10){
+                alert("You Win.Congratulations!!");
+                document.location.reload();
+                cScore = 0;
+                pScore = 0;
+            }
+        }
+
+        function draw(){
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            drawCPU();
+            drawPlayer();
+            drawBall();
+            drawPScore();
+            drawCScore();
+            checkGame();
+            moveCpu();
+            collisionDetection();
+            x += dx;
+            y += dy;
+            requestAnimationFrame(draw);
+        }
+        draw();
+
+        document.addEventListener("mousemove",mouseMoveHandler,false);
+
+        function mouseMoveHandler(e){
+            var relativeX = e.clientX - canvas.offsetLeft;
+            if(relativeX>0 && relativeX<canvas.width)
+            {
+                paddleX = relativeX - paddleWidth;
+            }
+        }
+    </script>
+</body>
+</html>
